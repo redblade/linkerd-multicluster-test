@@ -1,0 +1,23 @@
+https://linkerd.io/2.10/tasks/multicluster/#install-linkerd
+
+kubectl --context east apply -f east/ns.yml 
+kubectl --context east apply -f east/podinfo_new.yaml 
+kubectl --context east apply -f east/frontend.yml 
+kubectl --context west apply -f west/ns.yml 
+kubectl --context west apply -f west/podinfo_new.yaml 
+kubectl --context west apply -f west/frontend.yml 
+
+kubectl --context=east label svc -n test podinfo mirror.linkerd.io/exported=true
+kubectl --context=west -n test get svc podinfo-east
+
+kubectl --context=west -n test get endpoints podinfo-east \
+  -o 'custom-columns=ENDPOINT_IP:.subsets[*].addresses[*].ip'
+kubectl --context=east -n linkerd-multicluster get svc linkerd-gateway \
+  -o "custom-columns=GATEWAY_IP:.status.loadBalancer.ingress[*].ip"
+
+kubectl --context=west -n test exec -c nginx -it \
+  $(kubectl --context=west -n test get po -l app=frontend \
+    --no-headers -o custom-columns=:.metadata.name) \
+  -- /bin/sh -c "curl http://podinfo-east:9898"
+
+#If returns "greeting from east", it works
