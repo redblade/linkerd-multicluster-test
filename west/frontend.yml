@@ -80,8 +80,6 @@ spec:
               value: "1"
             - name: SERVICE
               value: podinfo
-            - name: SERVICE
-              value: podinfo-east
 
           command: ["/bin/sh", "-c"]
           args:
@@ -101,7 +99,7 @@ spec:
             - name: CONCURRENCY
               value: "1"
             - name: SERVICE
-              value: podinfo
+              value: podinfo-east
 
           command: ["/bin/sh", "-c"]
           args:
